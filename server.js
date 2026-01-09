@@ -3,9 +3,18 @@ import { spawn } from 'child_process'
 import { promises as fs } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import OpenAI from 'openai'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
+
+// Initialize OpenAI client
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
+})
 
 const app = express()
 const PORT = 3000
@@ -115,18 +124,156 @@ function generateTestName(prompt) {
 }
 
 async function generateTestFiles(testDetails) {
-    // In a real implementation, this would call an AI service
-    // For now, we'll create a simple placeholder
-
+    // Use OpenAI to generate test files based on the prompt
     const featurePath = path.join(__dirname, testDetails.featureFile)
+    const stepsPath = path.join(__dirname, 'features/step-definitions/settings.steps.js')
+    const pageObjectPath = path.join(__dirname, 'features/pageobjects/settings.page.js')
 
-    // Check if file already exists
+    // Read existing files to provide context
+    let existingSteps = ''
+    let existingPageObject = ''
+
     try {
-        await fs.access(featurePath)
-        console.log(`Feature file ${testDetails.featureFile} already exists`)
-    } catch {
-        console.log(`Would generate: ${testDetails.featureFile}`)
-        // In production, this would use Claude API or similar to generate the actual test
+        existingSteps = await fs.readFile(stepsPath, 'utf-8')
+    } catch (err) {
+        // File might not exist yet
+    }
+
+    try {
+        existingPageObject = await fs.readFile(pageObjectPath, 'utf-8')
+    } catch (err) {
+        // File might not exist yet
+    }
+
+    // Create the AI prompt
+    const systemPrompt = `You are an expert test automation engineer specializing in Appium, WebdriverIO, and Cucumber BDD for iOS testing.
+
+Your task is to generate complete E2E test files based on user instructions.
+
+Follow these strict guidelines:
+1. Use Gherkin syntax for feature files (Given/When/Then)
+2. Implement step definitions using async/await
+3. Use Page Object Model pattern
+4. Use iOS-specific selectors (XPath, Predicate strings)
+5. Include fallback selectors for robust element location
+6. Follow existing patterns in the codebase
+
+Feature File Guidelines:
+- Use "Feature:" to describe the test suite
+- Use "Background:" for common setup (launching the app)
+- Use "Scenario:" for individual test cases
+- Steps should be business-readable, not technical
+
+Step Definition Guidelines:
+- Import: import { Given, When, Then } from '@wdio/cucumber-framework'
+- Use async/await for all step functions
+- Call page object methods, don't interact with elements directly
+- Throw errors for failed assertions
+
+Page Object Guidelines:
+- Use iOS predicate strings: '-ios predicate string:type == "XCUIElementTypeButton" AND label == "ButtonName"'
+- Use XPath selectors as fallback: '//XCUIElementTypeStaticText[@name="Text"]'
+- Implement multiple selector strategies with try-catch for robustness
+- Add scroll support using: driver.execute('mobile: scroll', { direction: 'down' })
+- Return boolean for verification methods
+
+Example existing pattern:
+\`\`\`javascript
+async isFontListed(fontName) {
+    const selector = \`//XCUIElementTypeStaticText[@name='\${fontName}']\`
+
+    try {
+        const fontEl = await $(selector)
+        if (await fontEl.isDisplayed()) {
+            return true
+        }
+    } catch (err) {
+        // Not visible, try scrolling
+    }
+
+    for (let i = 0; i < 10; i++) {
+        try {
+            await driver.execute('mobile: scroll', { direction: 'down' })
+            await browser.pause(500)
+            const fontEl = await $(selector)
+            if (await fontEl.isDisplayed()) {
+                return true
+            }
+        } catch (err) {
+            // Continue scrolling
+        }
+    }
+    return false
+}
+\`\`\`
+
+IMPORTANT: Only generate NEW code that needs to be added. Do not duplicate existing step definitions or page object methods.`
+
+    const userPrompt = `Generate test files for this test scenario:
+
+${testDetails.prompt}
+
+EXISTING STEP DEFINITIONS:
+${existingSteps || 'None yet'}
+
+EXISTING PAGE OBJECT METHODS:
+${existingPageObject || 'None yet'}
+
+Generate the following:
+1. Feature file content (complete file)
+2. New step definitions to add (only new ones not already present)
+3. New page object methods to add (only new ones not already present)
+
+Return your response in this exact JSON format:
+{
+  "featureFile": "complete feature file content here",
+  "stepDefinitions": "new step definitions to add (or empty string if all exist)",
+  "pageObjectMethods": "new page object methods to add (or empty string if all exist)",
+  "explanation": "brief explanation of what was generated"
+}`
+
+    try {
+        const completion = await openai.chat.completions.create({
+            model: process.env.OPENAI_MODEL || 'gpt-4',
+            messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: userPrompt }
+            ],
+            response_format: { type: 'json_object' },
+            temperature: 0.7
+        })
+
+        const response = JSON.parse(completion.choices[0].message.content)
+
+        // Write the feature file
+        await fs.writeFile(featurePath, response.featureFile, 'utf-8')
+        console.log(`✅ Generated feature file: ${testDetails.featureFile}`)
+
+        // Append new step definitions if any
+        if (response.stepDefinitions && response.stepDefinitions.trim()) {
+            await fs.appendFile(stepsPath, '\n\n' + response.stepDefinitions, 'utf-8')
+            console.log(`✅ Added new step definitions`)
+        }
+
+        // Append new page object methods if any
+        if (response.pageObjectMethods && response.pageObjectMethods.trim()) {
+            // Read existing page object to insert before closing brace
+            const pageObjectContent = await fs.readFile(pageObjectPath, 'utf-8')
+            const lastBraceIndex = pageObjectContent.lastIndexOf('}')
+            const updatedContent = pageObjectContent.slice(0, lastBraceIndex) +
+                '\n' + response.pageObjectMethods + '\n' +
+                pageObjectContent.slice(lastBraceIndex)
+            await fs.writeFile(pageObjectPath, updatedContent, 'utf-8')
+            console.log(`✅ Added new page object methods`)
+        }
+
+        console.log(`📝 ${response.explanation}`)
+
+        testDetails.aiExplanation = response.explanation
+
+    } catch (error) {
+        console.error('❌ Error generating test files with OpenAI:', error.message)
+        throw new Error(`AI generation failed: ${error.message}`)
     }
 }
 

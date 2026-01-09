@@ -78,7 +78,22 @@ npm install
 
 ## 🖥️ GUI Application
 
-This project includes a web-based GUI that allows you to generate and run tests without using the command line!
+This project includes a web-based GUI that allows you to generate and run tests without using the command line! The GUI uses **OpenAI GPT-4** to automatically generate test files from natural language descriptions.
+
+### Setup
+
+1. **Get an OpenAI API Key**
+   - Sign up at https://platform.openai.com/
+   - Create an API key from your account settings
+
+2. **Configure the API Key**
+   ```bash
+   # Copy the example environment file
+   cp .env.example .env
+
+   # Edit .env and add your OpenAI API key
+   OPENAI_API_KEY=your_actual_api_key_here
+   ```
 
 ### Starting the GUI
 
@@ -95,15 +110,25 @@ http://localhost:3000
 ### Using the GUI
 
 1. **Enter Test Instructions** - Describe your test in natural language in the text area
-2. **Click "Generate & Run Test"** - The system will automatically:
-   - Parse your instructions
-   - Generate the test files (feature file, step definitions, page objects)
-   - Run the tests on the iOS simulator
-   - Validate the results
+   ```
+   Example: Test that the iOS Settings app has a "Bluetooth" option under General settings
+   ```
+
+2. **Click "Generate & Run Test"** - The AI will automatically:
+   - **Generate test files** using OpenAI GPT-4
+     - Creates Gherkin feature file
+     - Generates step definitions
+     - Creates page object methods
+   - **Run the tests** on the iOS simulator
+   - **Validate the results** and report any issues
+
 3. **View Results** - See real-time progress and detailed test results
+
 4. **Test History** - Access previously run tests from the history panel
 
 ### GUI Features
+
+🤖 **AI-Powered Generation** - Uses OpenAI GPT-4 to automatically create test files from natural language
 
 ✨ **Real-time Progress Tracking** - Watch each step of test generation and execution
 
@@ -112,6 +137,21 @@ http://localhost:3000
 📜 **Test History** - Keep track of all tests run with the ability to review past results
 
 🎯 **One-Click Testing** - No command line needed, just describe and click!
+
+### How the AI Generation Works
+
+When you submit a test description, the system:
+
+1. **Analyzes your prompt** - Understands what you want to test
+2. **Reads existing code** - Examines current step definitions and page objects to avoid duplication
+3. **Generates new code** - Creates only the new components needed:
+   - Feature file with Gherkin scenarios
+   - Step definitions (if new steps are needed)
+   - Page object methods (if new methods are needed)
+4. **Follows best practices** - Uses iOS predicate strings, fallback selectors, scroll support, and proper error handling
+5. **Runs and validates** - Executes the test and reports results
+
+The AI has been trained on the existing codebase patterns and follows the same conventions for consistency.
 
 ### Configuration
 
