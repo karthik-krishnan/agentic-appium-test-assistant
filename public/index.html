@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic Appium Test Assistant</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 Agentic Appium Test Assistant</h1>
+            <p class="subtitle">AI-Powered Test Generation & Execution</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Input Section -->
+            <div class="card input-section">
+                <h2>📝 Describe Your Test</h2>
+                <p class="help-text">Enter your test instructions in natural language. The AI will generate, run, and validate the test automatically.</p>
+
+                <textarea
+                    id="testPrompt"
+                    placeholder="Example:&#10;1. Start Appium and launch App &quot;com.apple.Preferences&quot;&#10;2. Click on &quot;General&quot; and make sure its switching page&#10;3. Click on &quot;Fonts&quot; and make sure its switching to Fonts Page&#10;4. Click on &quot;System Fonts&quot; and make sure its switching to System Fonts Page&#10;5. Now verify that the page has &quot;Charter&quot; Font listed&#10;6. Write these steps as an E2E test case using Appium &amp; WebdriverIO.&#10;Follow guidelines in copilot-instructions-cucumber.md."
+                    rows="10"
+                ></textarea>
+
+                <button id="generateBtn" class="btn btn-primary">
+                    <span class="btn-icon">✨</span>
+                    Generate & Run Test
+                </button>
+            </div>
+
+            <!-- Progress Section -->
+            <div id="progressSection" class="card progress-section" style="display: none;">
+                <h2>⚙️ Processing</h2>
+                <div id="progressSteps"></div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="resultsSection" class="card results-section" style="display: none;">
+                <h2>📊 Test Results</h2>
+                <div id="testResults"></div>
+            </div>
+
+            <!-- Test History -->
+            <div class="card history-section">
+                <h2>📜 Recent Tests</h2>
+                <div id="testHistory" class="history-list">
+                    <p class="empty-state">No tests run yet. Create your first test above!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

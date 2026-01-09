@@ -11,9 +11,12 @@
     "appium-xcuitest-driver": "^10.14.6"
   },
   "scripts": {
-    "wdio": "wdio run ./wdio.cucumber.conf.js"
+    "wdio": "wdio run ./wdio.cucumber.conf.js",
+    "start": "node server.js",
+    "dev": "node server.js"
   },
   "dependencies": {
-    "@gavrix/appium-mcp": "^0.3.0"
+    "@gavrix/appium-mcp": "^0.3.0",
+    "express": "^4.22.1"
   }
 }

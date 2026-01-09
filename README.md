@@ -76,6 +76,43 @@ cd agentic-appium-test-assistant
 npm install
 ```
 
+## 🖥️ GUI Application
+
+This project includes a web-based GUI that allows you to generate and run tests without using the command line!
+
+### Starting the GUI
+
+```bash
+# Start the web server
+npm start
+```
+
+Then open your browser and navigate to:
+```
+http://localhost:3000
+```
+
+### Using the GUI
+
+1. **Enter Test Instructions** - Describe your test in natural language in the text area
+2. **Click "Generate & Run Test"** - The system will automatically:
+   - Parse your instructions
+   - Generate the test files (feature file, step definitions, page objects)
+   - Run the tests on the iOS simulator
+   - Validate the results
+3. **View Results** - See real-time progress and detailed test results
+4. **Test History** - Access previously run tests from the history panel
+
+### GUI Features
+
+✨ **Real-time Progress Tracking** - Watch each step of test generation and execution
+
+📊 **Detailed Results** - View passing/failing stats, validation issues, and full test output
+
+📜 **Test History** - Keep track of all tests run with the ability to review past results
+
+🎯 **One-Click Testing** - No command line needed, just describe and click!
+
 ### Configuration
 
 Update the device configuration in `wdio.conf.js`:

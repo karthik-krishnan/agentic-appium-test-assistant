@@ -3,3 +3,4 @@ tmp/
 package-lock.json
 .DS_Store
 *.log
+.idea/
