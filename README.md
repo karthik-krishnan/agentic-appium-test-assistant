@@ -78,9 +78,38 @@ npm install
 
 ## 🖥️ GUI Application
 
-This project includes a web-based GUI that allows you to generate and run tests without using the command line! The GUI uses **OpenAI GPT-4** to automatically generate test files from natural language descriptions.
+This project includes a web-based GUI that allows you to generate and run tests without using the command line! The GUI uses AI (either **OpenAI GPT-4** or **local open-source LLMs via Ollama**) to automatically generate test files from natural language descriptions.
 
 ### Setup
+
+You can choose between two AI providers:
+
+#### Option 1: Ollama (Recommended - Free & Local)
+
+1. **Install Ollama**
+   - Download from https://ollama.com/
+   - Or use homebrew: `brew install ollama`
+
+2. **Pull a Model**
+   ```bash
+   # Download a model (choose one):
+   ollama pull llama3.1        # Meta's Llama 3.1 (recommended)
+   ollama pull qwen2.5-coder   # Qwen 2.5 Coder (great for code generation)
+   ollama pull codellama       # Code Llama (specialized for code)
+   ollama pull mistral         # Mistral (balanced performance)
+   ```
+
+3. **Configure the Environment**
+   ```bash
+   # Copy the example environment file
+   cp .env.example .env
+
+   # Edit .env and set:
+   LLM_PROVIDER=ollama
+   OLLAMA_MODEL=llama3.1
+   ```
+
+#### Option 2: OpenAI (Requires API Key & Credits)
 
 1. **Get an OpenAI API Key**
    - Sign up at https://platform.openai.com/
@@ -91,8 +120,10 @@ This project includes a web-based GUI that allows you to generate and run tests 
    # Copy the example environment file
    cp .env.example .env
 
-   # Edit .env and add your OpenAI API key
+   # Edit .env and set:
+   LLM_PROVIDER=openai
    OPENAI_API_KEY=your_actual_api_key_here
+   OPENAI_MODEL=gpt-4
    ```
 
 ### Starting the GUI
@@ -128,7 +159,7 @@ http://localhost:3000
 
 ### GUI Features
 
-🤖 **AI-Powered Generation** - Uses OpenAI GPT-4 to automatically create test files from natural language
+🤖 **AI-Powered Generation** - Uses AI (OpenAI GPT-4 or local open-source LLMs) to automatically create test files from natural language
 
 ✨ **Real-time Progress Tracking** - Watch each step of test generation and execution
 

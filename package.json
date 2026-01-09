@@ -19,6 +19,7 @@
     "@gavrix/appium-mcp": "^0.3.0",
     "dotenv": "^17.2.3",
     "express": "^4.22.1",
+    "ollama": "^0.6.3",
     "openai": "^6.15.0"
   }
 }

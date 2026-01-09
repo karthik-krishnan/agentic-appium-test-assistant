@@ -4,6 +4,7 @@ import { promises as fs } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import OpenAI from 'openai'
+import { Ollama } from 'ollama'
 import dotenv from 'dotenv'
 
 dotenv.config()
@@ -11,10 +12,23 @@ dotenv.config()
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
-})
+// Determine which LLM provider to use
+const LLM_PROVIDER = process.env.LLM_PROVIDER || 'ollama' // 'openai' or 'ollama'
+
+// Initialize LLM clients
+let openai, ollama
+
+if (LLM_PROVIDER === 'openai') {
+    openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY
+    })
+    console.log('🤖 Using OpenAI for test generation')
+} else {
+    ollama = new Ollama({
+        host: process.env.OLLAMA_HOST || 'http://localhost:11434'
+    })
+    console.log('🤖 Using Ollama (local LLM) for test generation')
+}
 
 const app = express()
 const PORT = 3000
@@ -233,17 +247,38 @@ Return your response in this exact JSON format:
 }`
 
     try {
-        const completion = await openai.chat.completions.create({
-            model: process.env.OPENAI_MODEL || 'gpt-4',
-            messages: [
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: userPrompt }
-            ],
-            response_format: { type: 'json_object' },
-            temperature: 0.7
-        })
+        let response
 
-        const response = JSON.parse(completion.choices[0].message.content)
+        if (LLM_PROVIDER === 'openai') {
+            // Use OpenAI
+            const completion = await openai.chat.completions.create({
+                model: process.env.OPENAI_MODEL || 'gpt-4',
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: userPrompt }
+                ],
+                response_format: { type: 'json_object' },
+                temperature: 0.7
+            })
+            response = JSON.parse(completion.choices[0].message.content)
+        } else {
+            // Use Ollama (local LLM)
+            const ollamaModel = process.env.OLLAMA_MODEL || 'llama3.1'
+
+            const completion = await ollama.chat({
+                model: ollamaModel,
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: userPrompt }
+                ],
+                format: 'json',
+                options: {
+                    temperature: 0.7
+                }
+            })
+
+            response = JSON.parse(completion.message.content)
+        }
 
         // Write the feature file
         await fs.writeFile(featurePath, response.featureFile, 'utf-8')
