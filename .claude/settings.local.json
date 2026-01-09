@@ -6,7 +6,9 @@
       "Bash(npm --version:*)",
       "Bash(export PATH=\"/Users/Karthik.Krishnan/.nvm/versions/node/v20.19.6/bin:$PATH\")",
       "Bash(npm run wdio:*)",
-      "Bash(export PATH=\"/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/Users/Karthik.Krishnan/.nvm/versions/node/v20.19.6/bin:$PATH\")"
+      "Bash(export PATH=\"/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/Users/Karthik.Krishnan/.nvm/versions/node/v20.19.6/bin:$PATH\")",
+      "Bash(pgrep:*)",
+      "Bash(npx wdio:*)"
     ]
   }
 }
