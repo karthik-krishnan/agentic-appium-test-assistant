@@ -1,0 +1,24 @@
+{
+  "android": {
+    "platformName": "Android",
+    "appium:platformVersion": "12",
+    "appium:deviceName": "Android Emulator",
+    "appium:app": "<PATH_TO_YOUR_ANDROID_APP>",
+    "appium:automationName": "UiAutomator2",
+    "appium:ensureWebviewsHavePages": true,
+    "appium:nativeWebScreenshot": true,
+    "appium:newCommandTimeout": 3600,
+    "appium:connectHardwareKeyboard": true
+  },
+  "ios": {
+    "platformName": "iOS",
+    "appium:platformVersion": "26.2",
+    "appium:deviceName": "iPhone 17 Pro Max",
+    "appium:uuid": "48D47471-4023-42A1-8EBC-1CF7B590AF56",
+    "appium:automationName": "XCUITest",
+    "appium:ensureWebviewsHavePages": true,
+    "appium:nativeWebScreenshot": true,
+    "appium:newCommandTimeout": 3600,
+    "appium:connectHardwareKeyboard": true
+  }
+}

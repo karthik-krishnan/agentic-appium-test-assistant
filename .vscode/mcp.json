@@ -1,0 +1,12 @@
+{
+  "servers": {
+    "mcp-appium": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@gavrix/appium-mcp"],
+      "env": {
+        "CAPABILITIES_CONFIG": "/Users/Karthik.Krishnan/workspace/appium-mcp/capabilities.json"
+      }
+    }
+  }
+}
