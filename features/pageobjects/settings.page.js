@@ -61,12 +61,32 @@ class SettingsPage extends Page {
     }
 
     async isFontListed (fontName) {
-        const fontEl = await $(`//XCUIElementTypeStaticText[@name='${fontName}']`)
+        const selector = `//XCUIElementTypeStaticText[@name='${fontName}']`
+
+        // First check if already visible
         try {
-            return await fontEl.isDisplayed()
+            const fontEl = await $(selector)
+            if (await fontEl.isDisplayed()) {
+                return true
+            }
         } catch (err) {
-            return false
+            // Not visible, try scrolling
         }
+
+        // Scroll down to find the font (up to 10 swipes)
+        for (let i = 0; i < 10; i++) {
+            try {
+                await driver.execute('mobile: scroll', { direction: 'down' })
+                await browser.pause(500)
+                const fontEl = await $(selector)
+                if (await fontEl.isDisplayed()) {
+                    return true
+                }
+            } catch (err) {
+                // Continue scrolling
+            }
+        }
+        return false
     }
 
     async openSystemFonts () {
